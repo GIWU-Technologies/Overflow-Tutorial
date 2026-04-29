@@ -1,5 +1,10 @@
 using Microsoft.EntityFrameworkCore;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 using QuestionService.Data;
+using QuestionService.Services;
+using Wolverine;
+using Wolverine.RabbitMQ;
 
 namespace QuestionService;
 
@@ -17,6 +22,10 @@ public class Program
         
         // aspire config
         builder.AddServiceDefaults();
+
+        builder.Services.AddMemoryCache();
+        builder.Services.AddScoped<TagService>();
+        
         // keycloak
         builder.Services.AddAuthentication()
             .AddKeycloakJwtBearer(serviceName: "keycloak", realm: "overflow", options =>
@@ -27,6 +36,22 @@ public class Program
             });
         
         builder.AddNpgsqlDbContext<QuestionDbContext>("questionDb");
+
+        // add open telemetry for wolverine/rabbitmq manually
+        builder.Services.AddOpenTelemetry()
+            .WithTracing(traceProviderBuilder =>
+            {
+                traceProviderBuilder.SetResourceBuilder(ResourceBuilder.CreateDefault()
+                    .AddService(builder.Environment.ApplicationName))
+                    .AddSource("Wolverine");
+            });
+        
+        builder.Host.UseWolverine(opts =>
+        {
+            opts.UseRabbitMqUsingNamedConnection("messaging")
+                .AutoProvision();
+            opts.PublishAllMessages().ToRabbitExchange("questions");
+        });
 
         var app = builder.Build();
 
