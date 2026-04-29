@@ -7,3 +7,6 @@
     * Realm: master
     * Username: kc-admin
     * Password: Pa$$w0rd
+
+• User secrets
+    * dotnet user-secrets set "Parameters:typesense-api-key" "abc"
