@@ -1,0 +1,38 @@
+import {Question} from "@/lib/types";
+import {Avatar, Chip} from "@heroui/react";
+import Link from "next/link";
+
+type Props = {
+    question: Question
+}
+
+export default function QuestionFooter({question}: Props) {
+    return (
+        <div className='flex justify-between mt-2'>
+            <div className='flex flex-col self-end'>
+                <div className='flex gap-2'>
+                    {question.tagSlugs.map(tag => (
+                        <Chip key={tag}>
+                            <Link href={`/questions?tag=${tag}`}>
+                                {tag}
+                            </Link>
+                        </Chip>
+                    ))}
+                </div>
+            </div>
+            
+            <div className='flex flex-col basis-2/5 bg-slate-500/10 dark:bg-slate-100/20 px-3 py-2 gap-2 rounded-md text-primary'>
+                <span className='text-sm font-extralight'>asked {question.createdAt}</span>
+                <div className='flex items-center gap-3'>
+                    <Avatar className='h-6 w-6' color='default'>
+                        {question.askerDisplayName.charAt(0)}
+                    </Avatar>
+                    <div className='flex flex-col items-center'>
+                        <span>{question.askerDisplayName}</span>
+                        <span className='self-start text-sm font-semibold'>42</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}
