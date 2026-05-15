@@ -1,4 +1,5 @@
 using System.Text.RegularExpressions;
+using Common;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using SearchService.Data;
@@ -23,25 +24,33 @@ public class Program
         builder.Services.AddOpenApi();
         builder.AddServiceDefaults();
 
-        // add open telemetry for wolverine/rabbitmq manually
-        builder.Services.AddOpenTelemetry()
-            .WithTracing(traceProviderBuilder =>
-            {
-                traceProviderBuilder.SetResourceBuilder(ResourceBuilder.CreateDefault()
-                        .AddService(builder.Environment.ApplicationName))
-                    .AddSource("Wolverine");
-            });
-        
-        builder.Host.UseWolverine(opts =>
+        // // add open telemetry for wolverine/rabbitmq manually
+        // builder.Services.AddOpenTelemetry()
+        //     .WithTracing(traceProviderBuilder =>
+        //     {
+        //         traceProviderBuilder.SetResourceBuilder(ResourceBuilder.CreateDefault()
+        //                 .AddService(builder.Environment.ApplicationName))
+        //             .AddSource("Wolverine");
+        //     });
+        //
+        // builder.Host.UseWolverine(opts =>
+        // {
+        //     opts.UseRabbitMqUsingNamedConnection("messaging")
+        //         .AutoProvision();
+        //     opts.ListenToRabbitQueue("questions.search", cfg =>
+        //     {
+        //         cfg.BindExchange("questions");
+        //     });
+        // });
+        await builder.UseWolverineWithRabbitMqAsync(opts =>
         {
-            opts.UseRabbitMqUsingNamedConnection("messaging")
-                .AutoProvision();
+            //opts.PublishAllMessages().ToRabbitExchange("questions");
             opts.ListenToRabbitQueue("questions.search", cfg =>
             {
                 cfg.BindExchange("questions");
             });
+            opts.ApplicationAssembly = typeof(Program).Assembly;
         });
-        
 
         var typesenseUri = builder.Configuration["services:typesense:typesense:0"];
         if (string.IsNullOrEmpty(typesenseUri))

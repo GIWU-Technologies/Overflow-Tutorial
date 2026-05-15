@@ -4,3 +4,6 @@ obj/
 riderModule.iml
 /_ReSharper.Caches/
 .idea/
+Overflow.sln.DotSettings.user
+/infra/.env.Production
+/infra/realms/overflow-realm.json
