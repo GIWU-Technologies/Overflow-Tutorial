@@ -3,8 +3,16 @@ import {AcademicCapIcon, MagnifyingGlassIcon} from "@heroicons/react/24/solid";
 import {Button, InputGroup} from "@heroui/react";
 import ThemeToggle from "@/components/nav/ThemeToggle";
 import SearchInput from "@/components/nav/SearchInput";
+import LoginButton from "@/components/nav/LoginButton";
+import {getCurrentUser} from "@/lib/actions/auth-actions";
+import UserMenu from "@/components/nav/UserMenu";
+import RegisterButton from "@/components/nav/RegisterButton";
 
-export default function TopNav() {
+export default async function TopNav() {
+    
+    const user = await getCurrentUser();
+    
+    
     return (
         <div>
             <header className='p-2 w-full fixed top-0 z-50 border-b bg-white dark:bg-black'>
@@ -23,10 +31,17 @@ export default function TopNav() {
                     
                     <SearchInput />
                     
-                    <div className='flex basis-1/4 shrink-0 justify-end gap-3'>
+                    <div className='flex basis-1/4 shrink-0 justify-end gap-3 items-center'>
                         <ThemeToggle />
-                        <Button variant='outline' className='rounded-lg border-purple-800 border-2 text-purple-300 dark:text-purple-400 dark:border-purple-400'>Login</Button>
-                        <Button className='rounded-lg bg-purple-800 text-white'>Register</Button>
+                        {user ? (
+                            <UserMenu user={user} />
+                        ) : (
+                            <>
+                                <LoginButton />
+                                <RegisterButton />
+                            </>
+                        )}
+                      
                     </div>
                     
                 </div>
